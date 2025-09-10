@@ -140,7 +140,7 @@ public class DefaultA2AServer implements A2AServer {
         final EventQueue eventQueue = queueManager.create(taskContext.getTaskId());
 
         // Execute agent and collect final result
-        return agentExecutor.execute(taskContext, eventQueue).thenMany(eventQueue.asFlux().doOnNext(event -> {
+        return Flux.merge(agentExecutor.execute(taskContext, eventQueue).thenMany(Mono.empty()), eventQueue.asFlux().doOnNext(event -> {
             if (event instanceof TaskStatusUpdateEvent) {
                 taskManager.applyStatusUpdate(currentTask, (TaskStatusUpdateEvent) event).block();
             } else if (event instanceof TaskArtifactUpdateEvent) {
